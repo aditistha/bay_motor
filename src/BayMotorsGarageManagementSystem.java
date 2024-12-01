@@ -1,26 +1,29 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class BayMotorsGarageManagementSystem {
     private static Scanner scanner = new Scanner(System.in);
     private static User currentUser = null;
-
+    private static List<Manager> managers = new ArrayList<>();
+    private static List<Mechanic> mechanics = new ArrayList<>();
+    private static List<Customer> customers = new ArrayList<>();
     public static void main(String[] args) {
         initializeSystem();
         mainMenu();
     }
-    class UserNotFoundException extends GarageManagementException {
-        public UserNotFoundException(String message) {
-            super(message);
-        }
-    }
+    private static Manager currentManager = null;
+    private static Mechanic currentMechanic = null;
+    private static Customer currentCustomer = null;
     private static void initializeSystem() {
         try {
             // Create initial users
             Manager manager = new Manager("M001", "John", "john@baymotors.com", "manager123");
             Mechanic mechanic = new Mechanic("ME001", "Aakriti", "aakriti@baymotors.com", "aakriti123");
             WalkInCustomer walkInCustomer = new WalkInCustomer("C001", "Aditi", "aditi@gmail.com", "aditi123");
-
+            managers.add(manager);
+            mechanics.add(mechanic);
+            customers.add(walkInCustomer);
             // Register initial users
             UserManagementService.getInstance().registerUser(manager);
             UserManagementService.getInstance().registerUser(mechanic);
@@ -83,13 +86,15 @@ public class BayMotorsGarageManagementSystem {
             return -1;
         }
     }
-    class InvalidCredentialsException extends GarageManagementException {
-        public InvalidCredentialsException(String message) {
-            super(message);
-        }
-    }
+    private static void loginMenu() {
+        System.out.println("\n--- Login ---");
+        System.out.println("1. Manager Login");
+        System.out.println("2. Mechanic Login");
+        System.out.println("3. Customer Login");
+        System.out.print("Enter login type: ");
 
-    private static void loginMenu() throws InvalidCredentialsException, UserManagementService.InvalidCredentialsException {
+        int loginType = getUserChoice();
+
         System.out.print("Enter Email: ");
         scanner.nextLine(); // Consume newline
         String email = scanner.nextLine();
@@ -97,9 +102,63 @@ public class BayMotorsGarageManagementSystem {
         System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
-        currentUser = UserManagementService.getInstance().authenticateUser(email, password);
-        System.out.println("Login successful. Welcome, " + currentUser.name);
+        switch (loginType) {
+            case 1:
+                loginManager(email, password);
+                break;
+            case 2:
+                loginMechanic(email, password);
+                break;
+            case 3:
+                loginCustomer(email, password);
+                break;
+            default:
+                System.out.println("Invalid login type.");
+        }
     }
+
+    private static void loginManager(String email, String password) {
+        for (Manager manager : managers) {
+            if (manager.email.equals(email) && manager.password.equals(password)) {
+                currentManager = manager;
+                System.out.println("Manager login successful: " + manager.name);
+                return;
+            }
+        }
+        System.out.println("Login failed. Invalid credentials.");
+    }
+
+    private static void loginMechanic(String email, String password) {
+        for (Mechanic mechanic : mechanics) {
+            if (mechanic.email.equals(email) && mechanic.password.equals(password)) {
+                currentMechanic = mechanic;
+                System.out.println("Mechanic login successful: " + mechanic.name);
+                return;
+            }
+        }
+        System.out.println("Login failed. Invalid credentials.");
+    }
+
+    private static void loginCustomer(String email, String password) {
+        for (Customer customer : customers) {
+            if (customer instanceof RegisteredCustomer) {
+                RegisteredCustomer regCustomer = (RegisteredCustomer) customer;
+                if (regCustomer.email.equals(email) && regCustomer.password.equals(password)) {
+                    currentCustomer = regCustomer;
+                    System.out.println("Customer login successful: " + regCustomer.name);
+                    return;
+                }
+            }
+        }
+        System.out.println("Login failed. Invalid credentials or not a registered customer.");
+    }
+    class InvalidCredentialsException extends GarageManagementException {
+        public InvalidCredentialsException(String message) {
+            super(message);
+        }
+    }
+
+
 
     private static void registerCustomerMenu() throws GarageManagementException {
         System.out.print("Enter Name: ");
