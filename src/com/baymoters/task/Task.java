@@ -25,8 +25,24 @@ public class Task implements Comparable<Task> {
         this.status = TaskStatus.COMPLETED;
     }
 
+    // Getter for vehicle
     public Vehicle getVehicle() {
         return vehicle;
+    }
+
+    // Getter for description
+    public String getDescription() {
+        return description;
+    }
+
+    // Getter for priority
+    public int getPriority() {
+        return priority;
+    }
+
+    // Getter for status
+    public TaskStatus getStatus() {
+        return status;
     }
 
     @Override
@@ -34,4 +50,3 @@ public class Task implements Comparable<Task> {
         return Integer.compare(other.priority, this.priority);
     }
 }
-
