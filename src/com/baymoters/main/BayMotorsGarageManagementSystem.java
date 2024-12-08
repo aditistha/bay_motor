@@ -4,7 +4,6 @@ import com.baymoters.customer.Customer;
 import com.baymoters.customer.RegisteredCustomer;
 import com.baymoters.customer.WalkInCustomer;
 import com.baymoters.exception.GarageManagementException;
-import com.baymoters.services.NotificationService;
 import com.baymoters.services.UserManagementService;
 import com.baymoters.task.Task;
 import com.baymoters.users.Manager;
@@ -19,9 +18,10 @@ import java.util.Scanner;
 public class BayMotorsGarageManagementSystem {
     private static Scanner scanner = new Scanner(System.in);
     private static User currentUser = null;
-    private static List<Manager> managers = new ArrayList<>();
-    private static List<Mechanic> mechanics = new ArrayList<>();
-    private static List<Customer> customers = new ArrayList<>();
+
+    private static List<Manager> managers = Initialization.managers;  // Use shared lists
+    private static List<Mechanic> mechanics = Initialization.mechanics;
+    private static List<Customer> customers = Initialization.customers;
     public static void main(String[] args) {
         initializeSystem();
         mainMenu();
@@ -29,40 +29,22 @@ public class BayMotorsGarageManagementSystem {
     private static Manager currentManager = null;
     private static Mechanic currentMechanic = null;
     private static Customer currentCustomer = null;
+
     private static void initializeSystem() {
         try {
-            // Create initial users
-            Manager manager = new Manager("M001", "Anita", "anita@gmail.com", "anita123");
-            Mechanic mechanic = new Mechanic("ME001", "Aakriti", "aakriti@gmail.com", "aakriti123");
-            WalkInCustomer walkInCustomer = new WalkInCustomer("C1", "aditi", "aditi@gmail.com", "aditi123");
-            RegisteredCustomer regCustomer = new RegisteredCustomer("C2", "Ronish", "ronish@gmail.com", "ronish123");
-            Vehicle vehicle1 = new Vehicle("ABC123", "Toyota", "Camry", 2019, walkInCustomer);
-            Vehicle vehicle2 = new Vehicle("XYZ789", "Honda", "Civic", 2020, regCustomer);
-
-            // Add vehicles to customers
-            walkInCustomer.addVehicle(vehicle1);
-            regCustomer.addVehicle(vehicle2);
-
-            managers.add(manager);
-            mechanics.add(mechanic);
-            customers.add(walkInCustomer);
-            customers.add(regCustomer);
-
-            // Register initial users
-            UserManagementService.getInstance().registerUser(manager);
-            UserManagementService.getInstance().registerUser(mechanic);
-            UserManagementService.getInstance().registerUser(walkInCustomer);
-            UserManagementService.getInstance().registerUser(regCustomer);
+            Initialization.initialize();
 
         } catch (GarageManagementException e) {
             System.out.println("Error initializing system: " + e.getMessage());
         }
     }
-   //Main menu
+
+   //Main menu Login
+
     private static void mainMenu() {
         while (true) {
-            System.out.println("\n--- Bay Motors Garage Management System ---");
-            System.out.println("\n--- Login ---");
+            System.out.println("\n------- Bay Motors Garage Management System ------");
+            System.out.println("\n------- Login --------");
             System.out.println("1. Manager Login");
             System.out.println("2. Mechanic Login");
             System.out.println("3. Customer Login");
@@ -71,11 +53,11 @@ public class BayMotorsGarageManagementSystem {
 
             int loginType = getUserChoice();
 
-            System.out.print("Enter Email: ");
+            System.out.print("Please Enter Email: ");
             scanner.nextLine();
             String email = scanner.nextLine();
 
-            System.out.print("Enter Password: ");
+            System.out.print("Please Enter Password: ");
             String password = scanner.nextLine();
 
                 switch (loginType) {
@@ -89,7 +71,7 @@ public class BayMotorsGarageManagementSystem {
                         loginCustomer(email, password);
                         break;
                     default:
-                        System.out.println("Invalid login type.");
+                        System.out.println("Login type is invalid.");
                 }
         }
     }
@@ -102,38 +84,7 @@ public class BayMotorsGarageManagementSystem {
         }
     }
 
-    //Login manager mechanic customer
 
-    private static void loginMenu() {
-        System.out.println("\n--- Login ---");
-        System.out.println("1. Manager Login");
-        System.out.println("2. Mechanic Login");
-        System.out.println("3. Customer Login");
-        System.out.print("Enter login type: ");
-
-        int loginType = getUserChoice();
-
-        System.out.print("Enter Email: ");
-        scanner.nextLine(); // Consume newline
-        String email = scanner.nextLine();
-
-        System.out.print("Enter Password: ");
-        String password = scanner.nextLine();
-
-        switch (loginType) {
-            case 1:
-                loginManager(email, password);
-                break;
-            case 2:
-                loginMechanic(email, password);
-                break;
-            case 3:
-                loginCustomer(email, password);
-                break;
-            default:
-                System.out.println("Invalid login type.");
-        }
-    }
 
     //Manager
 
@@ -141,233 +92,19 @@ public class BayMotorsGarageManagementSystem {
         for (Manager manager : managers) {
             if (manager.email.equals(email) && manager.password.equals(password)) {
                 currentManager = manager;
-                currentUser = manager; // Set the currentUser to the manager
+                currentUser = manager;
                 System.out.println("Manager login successful: " + manager.name);
                 try {
-                    managerMenu(); // Show manager menu after successful login
+                    ManagerLoginMenu.managerMenu(currentUser);
                 } catch (GarageManagementException e) {
                     System.out.println("Error: " + e.getMessage());
                 }
                 return;
             }
         }
-        System.out.println("Login failed. Invalid credentials.");
+        System.out.println("Login failed. ");
     }
 
-    private static void managerMenu() throws GarageManagementException {
-        if (!(currentUser instanceof Manager)) {
-            throw new GarageManagementException("Only managers can access this menu.");
-        }
-
-        Manager manager = (Manager) currentUser;
-
-        while (true) {
-            System.out.println("\n--- Manager Menu ---");
-            System.out.println("1. View Registered Customers");
-            System.out.println("2. Register Customer");
-            System.out.println("3. Upgrade Customer");
-            System.out.println("4. Allocate Task");
-            System.out.println("5. View Details");
-            System.out.println("6. Manage Manufacturer");
-            System.out.println("7. Manage Suppliers");
-            System.out.println("8. Send Notification");
-            System.out.println("0. Logout");
-            System.out.print("Enter your choice: ");
-
-            int choice = getUserChoice();
-
-            switch (choice) {
-                case 1:
-                    viewRegisteredCustomers();
-                    break;
-                case 2:
-                    registerCustomerMenu();
-                    break;
-                case 3:
-                    upgradeCustomer();
-                    break;
-                case 4:
-                    allocateTask(manager);
-                    break;
-                case 5:
-                    viewVehicleDetails();
-                    break;
-                case 6:
-                    manageManufacturers();
-                    break;
-                case 7:
-                    manageSuppliers();
-                    break;
-                case 8:
-                    sendNotification();
-                    break;
-                case 0:
-                    System.out.println("Logging out...");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
-    private static void viewRegisteredCustomers() {
-        if (customers.isEmpty()) {
-            System.out.println("No registered customers found.");
-            return;
-        }
-
-        System.out.println("--- Registered Customers ---");
-        for (Customer customer : customers) {
-            System.out.println(
-                    "Customer ID: " + customer.id +
-                     ", Name: " + customer.name +
-                    ", Email: " + customer.email +
-                    ", UserType: " + customer.getUserType());
-        }
-    }
-    private static void registerCustomerMenu() throws GarageManagementException {
-        System.out.print("Enter Customer ID: ");
-        scanner.nextLine(); // Consume newline
-        String id = scanner.nextLine();
-
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Enter Password: ");
-        String password = scanner.nextLine();
-
-        System.out.print("Enter User Type (Registered/Walk-In): ");
-        String userType = scanner.nextLine();
-
-        Customer newCustomer;
-        if ("Registered".equalsIgnoreCase(userType)) {
-            newCustomer = new RegisteredCustomer(id, name, email, password);
-        } else if ("Walk-In".equalsIgnoreCase(userType)) {
-            newCustomer = new WalkInCustomer(id, name, email, password);
-        } else {
-            System.out.println("Invalid user type. Please enter 'Registered' or 'Walk-In'.");
-            return;
-        }
-
-        // Add to the list of customers and register in the UserManagementService
-        customers.add(newCustomer);
-        UserManagementService.getInstance().registerUser(newCustomer);
-
-        System.out.println("Customer has been registered successfully.");
-    }
-    private static void upgradeCustomer() throws GarageManagementException {
-        System.out.print("Enter Walk-In Customer Email to Upgrade: ");
-        scanner.nextLine(); // Consume newline
-        String email = scanner.nextLine();
-
-        WalkInCustomer walkInCustomer = customers.stream()
-                .filter(c -> c instanceof WalkInCustomer && c.email.equals(email))
-                .map(c -> (WalkInCustomer) c)
-                .findFirst()
-                .orElseThrow(() -> new GarageManagementException("Walk-In Customer not found."));
-
-        // Upgrade the customer
-        RegisteredCustomer registeredCustomer = walkInCustomer.upgrade();
-        customers.remove(walkInCustomer); // Remove the walk-in customer
-        customers.add(registeredCustomer); // Add the registered customer
-
-        UserManagementService.getInstance().registerUser(registeredCustomer);
-
-        System.out.println("Customer " + registeredCustomer.name + " upgraded to Registered Customer.");
-    }
-
-    private static void allocateTask(Manager manager) throws GarageManagementException {
-        System.out.print("Enter Mechanic Email: ");
-        scanner.nextLine(); // Consume newline
-        String mechEmail = scanner.nextLine();
-
-        System.out.print("Enter Customer Email: ");
-        String custEmail = scanner.nextLine();
-
-        System.out.print("Enter Registration Number: ");
-        String regNumber = scanner.nextLine();
-
-        System.out.print("Enter Task Description: ");
-        String description = scanner.nextLine();
-
-        Mechanic mechanic = mechanics.stream()
-                .filter(m -> m.email.equals(mechEmail))
-                .findFirst()
-                .orElseThrow(() -> new GarageManagementException("Mechanic not found."));
-
-        Customer customer = customers.stream()
-                .filter(c -> c.email.equals(custEmail))
-                .findFirst()
-                .orElseThrow(() -> new GarageManagementException("Customer not found."));
-
-        Vehicle vehicle = customer.getVehicles().stream()
-                .filter(v -> v.getRegistrationNumber().equals(regNumber))
-                .findFirst()
-                .orElseThrow(() -> new GarageManagementException("Vehicle not found."));
-
-        manager.allocateTask(mechanic, vehicle, description);
-        System.out.println("Task allocated successfully.");
-    }
-    private static void viewVehicleDetails() throws GarageManagementException {
-        System.out.print("Enter Customer Email: ");
-        scanner.nextLine(); // Consume newline
-        String custEmail = scanner.nextLine();
-
-        Customer customer = customers.stream()
-                .filter(c -> c.email.equals(custEmail))
-                .findFirst()
-                .orElseThrow(() -> new GarageManagementException("Customer not found."));
-
-        System.out.println("--- Vehicles for " + customer.name + " ---");
-        customer.getVehicles().forEach(vehicle -> {
-            System.out.println("Registration Number: " + vehicle.getRegistrationNumber() +
-                    ", Make: " + vehicle.make + ", Model: " + vehicle.model + ", Year: " + vehicle.year);
-        });
-    }
-    private static void sendNotification() throws GarageManagementException {
-        System.out.println("1. Notify Registered Customers");
-        System.out.println("2. Notify Non-Registered Customers");
-        System.out.print("Enter your choice: ");
-
-        int choice = getUserChoice();
-
-        switch (choice) {
-            case 1:
-                System.out.print("Enter Offer for Registered Customers: ");
-                scanner.nextLine(); // Consume newline
-                String offer = scanner.nextLine();
-
-                customers.stream()
-                        .filter(c -> c instanceof RegisteredCustomer)
-                        .forEach(c -> {
-                            RegisteredCustomer registered = (RegisteredCustomer) c;
-                            registered.receiveOffer(offer);
-                        });
-
-                System.out.println("Offer sent to all registered customers.");
-                break;
-
-            case 2:
-                System.out.print("Enter Message for Non-Registered Customers: ");
-                scanner.nextLine(); // Consume newline
-                String message = scanner.nextLine();
-
-                customers.stream()
-                        .filter(c -> c instanceof WalkInCustomer)
-                        .forEach(c -> {
-                            System.out.println("Message sent to Walk-In Customer: " + c.name);
-                            System.out.println("Message: " + message);
-                        });
-
-                System.out.println("Message sent to all non-registered customers.");
-                break;
-
-            default:
-                System.out.println("Invalid choice.");
-        }
-    }
 
    //MECHANIC
 
@@ -583,11 +320,11 @@ public class BayMotorsGarageManagementSystem {
         Task selectedTask = tasks.get(0);
 
         System.out.print("Enter Completion Details: ");
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine();
         String completionDetails = scanner.nextLine();
 
         mechanic.completeTask(selectedTask, completionDetails);
-        System.out.println("com.baymoters.task.Task completed successfully.");
+        System.out.println("Task completed successfully.");
     }
 
     //Customer
@@ -667,7 +404,7 @@ public class BayMotorsGarageManagementSystem {
         Customer customer = (Customer) currentUser;
 
         System.out.print("Enter Registration Number: ");
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine();
         String regNumber = scanner.nextLine();
 
         System.out.print("Enter Make: ");

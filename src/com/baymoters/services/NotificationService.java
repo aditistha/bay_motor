@@ -15,10 +15,10 @@ public class NotificationService {
     }
 
     public void sendNotification(Customer customer, String message) {
-        System.out.println("Notification to " + customer.name + ": " + message);
+        System.out.println(  customer.name + "is Notified: " + message);
     }
 
     public void notifyCustomer(Customer customer) {
-        sendNotification(customer, "Your vehicle service is complete!");
+        sendNotification(customer, "Your vehicle service is complete. Thank You!");
     }
 }

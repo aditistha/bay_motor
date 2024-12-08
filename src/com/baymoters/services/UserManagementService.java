@@ -25,7 +25,7 @@ public class UserManagementService {
     public void registerUser(User user) throws GarageManagementException {
         String emailKey = user.email.toLowerCase();
         if (users.containsKey(user.email)) {
-            throw new GarageManagementException("com.baymoters.users.User with this email already exists");
+            throw new GarageManagementException("User with this email already exists");
         }
         users.put(emailKey, user);
     }
@@ -37,7 +37,7 @@ public class UserManagementService {
     public User authenticateUser(String email, String password) throws InvalidCredentialsException {
         User user = users.get(email.toLowerCase());
         if (user == null || !user.password.equals(password)) {
-            throw new InvalidCredentialsException("Invalid email or password");
+            throw new InvalidCredentialsException("Your email or password is inc");
         }
         return user;
     }
