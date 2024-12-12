@@ -25,8 +25,6 @@ public class Manager extends User {
         mechanic.addTask(task);
     }
 
-    public void sendNotification(Customer customer, String message) {
-        NotificationService.getInstance().sendNotification(customer, message);
-    }
+
 }
 

@@ -15,7 +15,12 @@ public class NotificationService {
     }
 
     public void sendNotification(Customer customer, String message) {
-        System.out.println(  customer.name + "is Notified: " + message);
+        if (customer != null) {
+            customer.addNotification(message); // Add the message to the customer's notifications
+            System.out.println(customer.name + " is notified: " + message);
+        } else {
+            System.out.println("Error: Customer is null. Cannot send notification.");
+        }
     }
 
     public void notifyCustomer(Customer customer) {

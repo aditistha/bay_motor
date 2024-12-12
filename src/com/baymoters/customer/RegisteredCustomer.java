@@ -21,10 +21,22 @@ public class RegisteredCustomer extends Customer {
     }
 
     @Override
-    protected void addTask(Task task) {
+    public void addNotification(String message) {
 
     }
 
+    @Override
+    public void viewNotifications() {
+
+    }
+
+    @Override
+    protected void addTask(Task task) {
+
+    }
+    public void notifyOffer(String offer) {
+        System.out.println("Special Offer for " + name + ": " + offer);
+    }
     public void addPreference(String preference) {
         preferences.add(preference);
     }

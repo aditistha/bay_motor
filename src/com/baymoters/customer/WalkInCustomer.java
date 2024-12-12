@@ -15,11 +15,23 @@ public class WalkInCustomer extends Customer {
     }
 
     @Override
+    public void addNotification(String message) {
+
+    }
+
+    @Override
+    public void viewNotifications() {
+
+    }
+
+    @Override
     protected void addTask(Task task) {
 
     }
 
     public RegisteredCustomer upgrade() {
-        return new RegisteredCustomer(this.id, this.name, this.password, this.email);
+        RegisteredCustomer registeredCustomer = new RegisteredCustomer(this.id, this.name, this.email, this.password);
+        System.out.println("Customer " + name + " has been upgraded to a registered customer.");
+        return registeredCustomer;
     }
 }

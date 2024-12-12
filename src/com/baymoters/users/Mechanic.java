@@ -1,5 +1,6 @@
 package com.baymoters.users;
 
+import com.baymoters.customer.Customer;
 import com.baymoters.services.NotificationService;
 import com.baymoters.task.Task;
 import com.baymoters.users.User;
@@ -15,14 +16,17 @@ public class Mechanic extends User {
         super(id, name, email, password);
         this.tasks = new ArrayList<>();
     }
+
     @Override
     public String getUserType() {
         return "MECHANIC";
     }
+
     public void addTask(Task task) {
         tasks.add(task);
-        Collections.sort(tasks); // Sort by priority
+        Collections.sort(tasks);
     }
+
     public List<Task> getTasks() {
         return tasks;
     }
@@ -30,6 +34,14 @@ public class Mechanic extends User {
     public void completeTask(Task task, String completionDetails) {
         task.complete(completionDetails);
         tasks.remove(task);
-        NotificationService.getInstance().notifyCustomer(task.getVehicle().getOwner());
+
+        Customer owner = task.getVehicle().getOwner();
+        if (owner != null) {
+            NotificationService.getInstance().notifyCustomer(owner);
+            System.out.println("Customer " + owner.getName() + " has been notified about task completion.");
+        } else {
+            System.out.println("Error: No owner associated with the vehicle.");
+        }
     }
 }
+

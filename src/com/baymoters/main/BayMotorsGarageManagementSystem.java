@@ -316,7 +316,7 @@ public class BayMotorsGarageManagementSystem {
             return;
         }
 
-        // Select first task for simplicity
+
         Task selectedTask = tasks.get(0);
 
         System.out.print("Enter Completion Details: ");
@@ -333,11 +333,11 @@ public class BayMotorsGarageManagementSystem {
         for (Customer customer : customers) {
             if (customer.email.equals(email) && customer.password.equals(password)) {
                 currentCustomer = customer;
-                currentUser = customer; // Set the currentUser to the customer
+                currentUser = customer;
                 System.out.println("Customer login successful: "+ customer.name );
 
                 try {
-                    customerMenu(); // Navigate to the customer-specific menu
+                    customerMenu();
                 } catch (GarageManagementException e) {
                     System.out.println("Error: " + e.getMessage());
                 }
@@ -358,7 +358,8 @@ public class BayMotorsGarageManagementSystem {
             System.out.println("\n--- Customer Menu ---");
             System.out.println("1. Register Vehicle");
             System.out.println("2. View My Vehicles");
-            System.out.println("3. Logout");
+            System.out.println("3. View Notifications");
+            System.out.println("4. Logout");
             System.out.print("Enter your choice: ");
 
             int choice = getUserChoice();
@@ -371,6 +372,9 @@ public class BayMotorsGarageManagementSystem {
                     viewMyVehicles(customer);
                     break;
                 case 3:
+                    customer.viewNotifications();
+                    break;
+                case 4:
                     System.out.println("Logging out...");
                     currentUser = null;
                     currentCustomer = null;
@@ -391,9 +395,28 @@ public class BayMotorsGarageManagementSystem {
 
         System.out.println("--- My Vehicles ---");
         for (Vehicle vehicle : vehicles) {
-            System.out.println("Registration Number: " + vehicle.getRegistrationNumber() +
+            System.out.print("Registration Number: " + vehicle.getRegistrationNumber() +
                     ", Make: " + vehicle.make + ", Model: " + vehicle.model + ", Year: " + vehicle.year);
+
+            // Check task status for this vehicle
+            Task task = getCurrentTaskForVehicle(vehicle);
+            if (task != null) {
+                System.out.println(", Status: " + task.getStatus());
+            } else {
+                System.out.println(", Status: No ongoing task");
+            }
         }
+    }
+
+    private static Task getCurrentTaskForVehicle(Vehicle vehicle) {
+        for (Mechanic mechanic : mechanics) {
+            for (Task task : mechanic.getTasks()) {
+                if (task.getVehicle().equals(vehicle)) {
+                    return task;
+                }
+            }
+        }
+        return null;
     }
 
     private static void registerVehicleMenu() throws GarageManagementException {
